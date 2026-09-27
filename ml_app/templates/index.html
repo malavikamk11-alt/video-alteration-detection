@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepGuard | Forensic Analysis</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+
+        :root {
+            --primary: #2563eb; /* Professional Blue */
+            --bg-body: #f8fafc;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+        }
+
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+        }
+
+        /* Minimalist Navbar */
+        .navbar {
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            padding: 1rem 0;
+        }
+        .navbar-brand {
+            font-weight: 600;
+            color: var(--text-main) !important;
+            letter-spacing: -0.5px;
+        }
+
+        /* Clean Card */
+        .feature-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            border: 1px solid #f1f5f9;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            height: 100%;
+            transition: transform 0.2s;
+        }
+        .feature-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+        }
+
+        /* Upload Zone */
+        .upload-container {
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05);
+            padding: 2.5rem;
+        }
+        
+        .upload-zone {
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            padding: 3rem 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f8fafc;
+        }
+        .upload-zone:hover {
+            border-color: var(--primary);
+            background: #eff6ff;
+            color: var(--primary);
+        }
+
+        .btn-primary-minimal {
+            background-color: var(--text-main);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px;
+            font-weight: 500;
+            transition: 0.2s;
+        }
+        .btn-primary-minimal:hover {
+            background-color: var(--primary);
+        }
+
+        /* Elegant Loader */
+        #loader {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(5px);
+            display: none; justify-content: center; align-items: center; flex-direction: column;
+            z-index: 999;
+        }
+        .spinner {
+            width: 40px; height: 40px;
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar mb-5">
+        <div class="container">
+            <a class="navbar-brand" href="#"><i class="fas fa-layer-group text-primary me-2"></i>detective.ai</a>
+            <span class="text-muted small">ResNeXt-LSTM Architecture</span>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="row align-items-center">
+            
+            <div class="col-lg-6 mb-5">
+                <h6 class="text-primary fw-bold text-uppercase letter-spacing-1">AI Forensics</h6>
+                <h1 class="display-5 fw-bold mb-3" style="letter-spacing: -1px;">Verify Video Authenticity.</h1>
+                <p class="lead text-muted mb-5">Detect deepfakes using frame-by-frame tensor analysis. Secure your media against digital manipulation.</p>
+                
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <i class="fas fa-fingerprint text-muted fs-4 mb-3"></i>
+                            <h6 class="fw-bold">Artifact Detection</h6>
+                            <p class="small text-muted mb-0">Identifies micro-glitches in facial landmarks often missed by the human eye.</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="feature-card">
+                            <i class="fas fa-shield-alt text-muted fs-4 mb-3"></i>
+                            <h6 class="fw-bold">Content Safety</h6>
+                            <p class="small text-muted mb-0">Prevents misinformation spread by verifying source integrity.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5 offset-lg-1">
+                <div class="upload-container">
+                    <form method="post" enctype="multipart/form-data" onsubmit="startScan()">
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-muted">ANALYSIS DEPTH (FRAMES)</label>
+                            <input type="number" name="sequence_length" class="form-control bg-light border-0 py-2" value="20">
+                        </div>
+
+                        <div class="upload-zone mb-4" onclick="document.getElementById('vid-input').click()">
+                            <i class="fas fa-cloud-upload-alt fs-2 mb-2 text-muted"></i>
+                            <div class="fw-bold">Upload Video File</div>
+                            <div class="small text-muted">MP4, AVI ,jpg ,png (Max 100MB)</div>
+                            {{ form.upload_video_file }}
+                        </div>
+
+                        <button type="submit" class="btn btn-primary-minimal w-100">
+                            Start Analysis
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="loader">
+        <div class="spinner mb-4"></div>
+        <h6 class="fw-bold text-dark">Processing</h6>
+        <p class="text-muted small">Extracting features with ResNeXt...</p>
+    </div>
+
+    <script>
+        function startScan() { document.getElementById('loader').style.display = 'flex'; }
+        
+        const realInput = document.querySelector('input[type="file"]');
+        if(realInput) {
+            realInput.id = 'vid-input';
+            realInput.style.display = 'none';
+            realInput.onchange = () => alert("File Selected: " + realInput.files[0].name);
+        }
+    </script>
+</body>
+</html>

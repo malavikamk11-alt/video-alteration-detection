@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Analysis Report</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap');
+        body { background-color: #f8fafc; color: #1e293b; font-family: 'Inter', sans-serif; padding-bottom: 3rem; }
+        .report-header { background: white; border-bottom: 1px solid #e2e8f0; padding: 1.5rem 0; margin-bottom: 2rem; }
+        .result-badge { display: inline-flex; align-items: center; padding: 0.5rem 1rem; border-radius: 99px; font-weight: 600; font-size: 0.9rem; }
+        .badge-real { background: #dcfce7; color: #166534; }
+        .badge-fake { background: #fee2e2; color: #991b1b; }
+        .content-card { background: white; border-radius: 12px; padding: 2rem; border: 1px solid #e2e8f0; height: 100%; }
+        .face-thumb { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .face-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 0.5rem; }
+        .progress { height: 8px; border-radius: 4px; background: #f1f5f9; }
+        .section-title { font-size: 0.75rem; text-transform: uppercase; color: #64748b; font-weight: 700; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+
+<div class="report-header">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div>
+            <div class="small text-muted fw-bold">CASE ID: #{{ confidence }}</div>
+            <h5 class="mb-0 fw-bold">Video Forensic Report</h5>
+        </div>
+        <a href="{% url 'ml_app:home' %}" class="btn btn-outline-secondary btn-sm">New Scan</a>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="content-card mb-4">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                        <div class="section-title">CLASSIFICATION RESULT</div>
+                        {% if output == 'REAL' %}
+                            <div class="result-badge badge-real"><i class="fas fa-check-circle me-2"></i> AUTHENTIC VIDEO</div>
+                        {% else %}
+                            <div class="result-badge badge-fake"><i class="fas fa-exclamation-triangle me-2"></i> POTENTIAL DEEPFAKE</div>
+                        {% endif %}
+                    </div>
+                    <div class="text-end">
+                        <div class="display-6 fw-bold">{{ confidence }}%</div>
+                        <div class="small text-muted">Confidence Score</div>
+                    </div>
+                </div>
+
+                <div class="progress mb-4">
+                    <div class="progress-bar {% if output == 'REAL' %}bg-success{% else %}bg-danger{% endif %}" style="width: {{ confidence }}%"></div>
+                </div>
+            </div>
+
+            <div class="content-card">
+                <div class="section-title">EXTRACTED FACES</div>
+                <div class="face-grid">
+                    {% for img in faces_cropped_images %}
+                        <img src="/static/uploaded_images/{{ img }}" class="face-thumb">
+                    {% empty %}
+                        <div class="text-muted small">No faces detected.</div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="content-card">
+                <div class="section-title">ANALYSIS DETAILS</div>
+                <p class="small text-muted">Analysis complete using ResNeXt-LSTM architecture.</p>
+                <hr>
+                <div class="small text-muted"><strong>Result:</strong> {{ output }}</div>
+            </div>
+        </div>    
+    </div>
+</div>
+
+</body>
+</html>
